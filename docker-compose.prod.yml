@@ -1,0 +1,23 @@
+version: "3.3"
+services:
+    haproxy:
+        image: tecnativa/haproxy-letsencrypt
+        restart: always
+        networks:
+            haproxy:
+                aliases:
+                    - haproxy
+        env_file:
+            - ./config.env
+        volumes:
+            - haproxy-config:/etc/haproxy
+            - haproxy-cert:/etc/letsencrypt
+        ports:
+            - 80:80
+            - 443:443
+volumes:
+    haproxy-config:
+    haproxy-cert:
+
+networks:
+    haproxy:

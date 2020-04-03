@@ -1,0 +1,25 @@
+version: "3.3"
+services:
+    pgadmin:
+        image: dpage/pgadmin4
+        restart: always
+        depends_on:
+            - db
+        networks:
+            - db
+        env_file:
+            - ./config/pgadmin4.env
+        ports:
+            - 8100:80
+
+    redis-commander:
+        image: rediscommander/redis-commander
+        restart: always
+        depends_on:
+            - redis
+        networks:
+            - redis
+        env_file:
+            - ./config/redis.env
+        ports:
+            - 8081:8081

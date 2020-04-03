@@ -1,0 +1,4 @@
+**/*.env  filter=git-crypt diff=git-crypt
+**/*.env.local  filter=git-crypt diff=git-crypt
+.env.json  filter=git-crypt diff=git-crypt
+.env.local.json  filter=git-crypt diff=git-crypt

@@ -1,0 +1,18 @@
+[package]
+name = "api"
+version = "0.1.0"
+authors = ["Mattias Festin <mail@mattiasfest.in>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "0.4.4"
+jwt = "0.4.0"
+scrypt = "0.2.0"
+envmnt = "0.8.1"
+uuid = "0.8"
+diesel = { version = "1.4.4", features = ["postgres"] }
+# diesel = { "1.4.4", features = ["postgres"] }
+redis = "0.15.1"
+dotenv = "0.15.0"

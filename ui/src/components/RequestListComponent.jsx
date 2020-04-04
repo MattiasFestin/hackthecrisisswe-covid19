@@ -45,6 +45,9 @@ export const RequestListComponent = (props) => {
 				]}
 				data={props.data}
 				title="Requests"
+				options={{
+					filtering: true
+				}}
 			/>
 		</div>
 	);

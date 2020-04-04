@@ -4,7 +4,20 @@ table! {
         created -> Timestamp,
         modified -> Timestamp,
         deleted -> Nullable<Timestamp>,
-        row_version -> Int4,
+        row_version -> Int8,
+    }
+}
+
+table! {
+    constraints (id) {
+        id -> Uuid,
+        created -> Timestamp,
+        modified -> Timestamp,
+        deleted -> Nullable<Timestamp>,
+        row_version -> Int8,
+        name -> Text,
+        unit_id -> Uuid,
+        constraint_type -> Uuid,
     }
 }
 
@@ -19,16 +32,29 @@ table! {
 }
 
 table! {
-    transaction_direction (id) {
-        id -> Int4,
-        name -> Text,
+    transactions (id) {
+        id -> Uuid,
+        created -> Timestamp,
+        modified -> Timestamp,
+        deleted -> Nullable<Timestamp>,
+        row_version -> Int8,
+        transaction_type_id -> Int8,
+        transaction_direction_id -> Int8,
+        lat -> Float4,
+        lng -> Float4,
     }
 }
 
 table! {
-    transaction_types (id) {
-        id -> Int4,
-        name -> Text,
+    transactions_constraints (id) {
+        id -> Uuid,
+        created -> Timestamp,
+        modified -> Timestamp,
+        deleted -> Nullable<Timestamp>,
+        row_version -> Int8,
+        transactions_id -> Uuid,
+        constraints_id -> Uuid,
+        operation -> Nullable<Json>,
     }
 }
 
@@ -38,7 +64,7 @@ table! {
         created -> Timestamp,
         modified -> Timestamp,
         deleted -> Nullable<Timestamp>,
-        row_version -> Int4,
+        row_version -> Int8,
         username -> Text,
         hash -> Text,
         roles -> Json,
@@ -47,8 +73,9 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     base_table,
+    constraints,
     spatial_ref_sys,
-    transaction_direction,
-    transaction_types,
+    transactions,
+    transactions_constraints,
     users,
 );

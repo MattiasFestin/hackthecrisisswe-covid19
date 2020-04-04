@@ -9,18 +9,21 @@ extern crate geo;
 mod db_models;
 mod cors_fairing;
 mod apihelper;
+mod transaction;
+mod schema;
 
-use crate::db_models::Users;
+use diesel::prelude::*;
 
 #[get("/")]
 fn index() -> &'static str {
-    let con = crate::apihelper::connect();
     "Hello, world!"
 }
 
 fn main() {
     let mut server = rocket::ignite().mount("/", routes![
-        index
+        index,
+        crate::transaction::getTransaction,
+        crate::transaction::getTransactionList
     ]);
 
     if envmnt::get_or("DEBUG", "0") != "0" {

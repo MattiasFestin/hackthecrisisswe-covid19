@@ -87,9 +87,7 @@ run_ui:
 	popd
 
 run_api:
-	cd api && \
-	DEBUG=1 cargo watch -x run && \
-	popd
+	DEBUG=1 cargo watch -x run
 
 run_containers:
 	docker-compose -f ./docker-compose.dev.yml -f ./docker-compose.yml up -d

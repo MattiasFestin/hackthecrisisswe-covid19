@@ -1,45 +1,49 @@
 use std::time::SystemTime;
+use serde::{Serialize, Deserialize};
+use crate::schema::*;
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct Users {
-    id: uuid::Uuid,
-    created: SystemTime,
-    modified: SystemTime,
-    deleted: bool,
-    row_version: i32,
+    pub id: uuid::Uuid,
+    pub created: SystemTime,
+    pub modified: SystemTime,
+    pub deleted: Option<SystemTime>,
+    pub row_version: u32,
 
-    username: String,
-    hash: String,
-    roles: Vec<String>
+    pub username: String,
+    pub hash: String,
+    pub roles: Vec<String>
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct TransactionTypes {
-    id: uuid::Uuid,
-    created: SystemTime,
-    modified: SystemTime,
-    deleted: bool,
-    row_version: i32,
+    pub id: uuid::Uuid,
+    pub created: SystemTime,
+    pub modified: SystemTime,
+    pub deleted: Option<SystemTime>,
+    pub row_version: u32,
 
-    name: String
+    pub name: String
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct TransactionDir {
-    id: uuid::Uuid,
-    created: SystemTime,
-    modified: SystemTime,
-    deleted: bool,
-    row_version: i32,
+    pub id: uuid::Uuid,
+    pub created: SystemTime,
+    pub modified: SystemTime,
+    pub deleted: Option<SystemTime>,
+    pub row_version: u32,
 
-    name: String
+    pub name: String
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum TransactionDirEnum {
     Request,
     Offer
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum TransactionTypesEnum {
     Work,
     Material,
@@ -47,12 +51,14 @@ pub enum TransactionTypesEnum {
     Production
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum ConstraintTypeEnum {
     Boolean,
     List,
     Numeric
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum ConstraintTypeOpEnum {
     bool_eq,
 
@@ -66,43 +72,43 @@ pub enum ConstraintTypeOpEnum {
     numeric_lt
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct TransactionConstraint {
-    id: uuid::Uuid,
-    created: SystemTime,
-    modified: SystemTime,
-    deleted: bool,
-    row_version: i32,
+    pub id: uuid::Uuid,
+    pub created: SystemTime,
+    pub modified: SystemTime,
+    pub deleted: Option<SystemTime>,
+    pub row_version: u32,
 
-    name: String,
-    unit: Unit,
-    constraint_type: ConstraintTypeEnum
+    pub name: String,
+    pub unit: Unit,
+    pub constraint_type: ConstraintTypeEnum
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct Unit {
-    id: uuid::Uuid,
-    created: SystemTime,
-    modified: SystemTime,
-    deleted: bool,
-    row_version: i32,
+    pub id: uuid::Uuid,
+    pub created: SystemTime,
+    pub modified: SystemTime,
+    pub deleted: Option<SystemTime>,
+    pub row_version: u32,
 
-    name: String
+    pub name: String
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize, Deserialize)]
 pub struct Transaction {
-    id: uuid::Uuid,
-    created: SystemTime,
-    modified: SystemTime,
-    deleted: bool,
-    row_version: i32,
+    pub id: uuid::Uuid,
+    pub created: SystemTime,
+    pub modified: SystemTime,
+    pub deleted: Option<SystemTime>,
+    pub row_version: i64,
 
-    coordinate: geo::Point<f64>,
+    pub transaction_direction_id: i64,
+    pub transaction_type_id: i64,
 
-    transaction_dir: TransactionDirEnum,
-    transaction_type: TransactionTypesEnum,
-    constraints: Vec<uuid::Uuid>,
+    pub lat: f32,
+    pub lng: f32,
 }
 
 // #[derive(Queryable)]
@@ -111,7 +117,7 @@ pub struct Transaction {
 //     created: SystemTime,
 //     modified: SystemTime,
 //     deleted: bool,
-//     row_version: i32,
+//     row_version: u32,
 
 //     transaction_dir: TransactionDirEnum,
 //     transaction_type: TransactionTypesEnum,

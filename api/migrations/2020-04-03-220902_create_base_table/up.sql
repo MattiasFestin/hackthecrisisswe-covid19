@@ -8,7 +8,7 @@ CREATE TABLE public.base_table
 	"created"				TIMESTAMP				NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"modified"				TIMESTAMP				NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	"deleted"				TIMESTAMP				NULL,
-	"row_version"			integer					NOT NULL DEFAULT 1,
+	"row_version"			bigint					NOT NULL DEFAULT 1,
 
 	PRIMARY KEY ("id")
 );

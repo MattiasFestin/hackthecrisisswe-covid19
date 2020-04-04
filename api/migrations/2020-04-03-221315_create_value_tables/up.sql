@@ -12,8 +12,10 @@ CREATE TABLE public.users
 
 CREATE TABLE public.transactions
 (
-	"transaction_type_id"		INTEGER					NOT NULL,
-	"transaction_direction_id"	INTEGER					NOT NULL,
+	"transaction_type_id"		int8					NOT NULL,
+	"transaction_direction_id"	int8					NOT NULL,
+	"lat"						REAL					NOT NULL,
+	"lng"						REAL					NOT NULL,
 
 	PRIMARY KEY ("id")
 

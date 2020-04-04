@@ -17,6 +17,10 @@ CREATE TABLE public.transactions
 	"lat"						REAL					NOT NULL,
 	"lng"						REAL					NOT NULL,
 
+	"what"						TEXT					NOT NULL,
+
+	"priority"					int8					NOT NULL,
+
 	PRIMARY KEY ("id")
 
 ) INHERITS ("base_table");
@@ -24,20 +28,23 @@ CREATE TABLE public.transactions
 CREATE TABLE public.transactions_constraints
 (
 	"transactions_id"			uuid					NOT NULL,
-	"constraints_id"			uuid					NOT NULL,
-	"operation"					JSON					NULL, -- eq, some, all, max, min
-
-	PRIMARY KEY ("id")
-
-) INHERITS ("base_table");
-
-CREATE TABLE public.constraints
-(
+	
+	"op"						int8					NOT NULL, -- eq, some, all, max, min
 	"name"						TEXT					NOT NULL,
-	"unit_id"					uuid					NOT NULL,
-	"constraint_type"			uuid					NOT NULL,
+	"unit"						TEXT					NOT NULL,
+	"value"						REAL					NOT NULL,
 
 	PRIMARY KEY ("id")
 
 ) INHERITS ("base_table");
+
+-- CREATE TABLE public.constraints
+-- (
+-- 	"name"						TEXT					NOT NULL,
+-- 	"unit_id"					uuid					NOT NULL,
+-- 	"constraint_type"			uuid					NOT NULL,
+
+-- 	PRIMARY KEY ("id")
+
+-- ) INHERITS ("base_table");
 

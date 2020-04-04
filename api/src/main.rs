@@ -7,6 +7,7 @@ extern crate dotenv;
 extern crate geo;
 
 mod db_models;
+mod view_models;
 mod cors_fairing;
 mod apihelper;
 mod transaction;

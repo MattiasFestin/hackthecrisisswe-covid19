@@ -9,19 +9,6 @@ table! {
 }
 
 table! {
-    constraints (id) {
-        id -> Uuid,
-        created -> Timestamp,
-        modified -> Timestamp,
-        deleted -> Nullable<Timestamp>,
-        row_version -> Int8,
-        name -> Text,
-        unit_id -> Uuid,
-        constraint_type -> Uuid,
-    }
-}
-
-table! {
     spatial_ref_sys (srid) {
         srid -> Int4,
         auth_name -> Nullable<Varchar>,
@@ -42,6 +29,8 @@ table! {
         transaction_direction_id -> Int8,
         lat -> Float4,
         lng -> Float4,
+        what -> Text,
+        priority -> Int8,
     }
 }
 
@@ -53,8 +42,10 @@ table! {
         deleted -> Nullable<Timestamp>,
         row_version -> Int8,
         transactions_id -> Uuid,
-        constraints_id -> Uuid,
-        operation -> Nullable<Json>,
+        op -> Int8,
+        name -> Text,
+        unit -> Text,
+        value -> Float4,
     }
 }
 
@@ -73,7 +64,6 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     base_table,
-    constraints,
     spatial_ref_sys,
     transactions,
     transactions_constraints,

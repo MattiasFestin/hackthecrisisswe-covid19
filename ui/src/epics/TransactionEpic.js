@@ -1,5 +1,5 @@
 import { requestJson } from '../utils/Request';
 
-export const LoginEpic = ({username, password}) => {
+export const transactionListEpic = () => {
 	return requestJson('/transactions');
 };

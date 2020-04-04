@@ -4,6 +4,8 @@ import MaterialTable from 'material-table';
 import { TransactionTypesEnum, TransactionTypesIcons, ConstraintTypeOpRender } from '../models/references';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import { useObservable } from 'react-use';
+
 const useStyles = makeStyles((theme) => ({
   root: {
 	flexGrow: 1,
@@ -18,6 +20,8 @@ const useStyles = makeStyles((theme) => ({
 
 export const RequestListComponent = (props) => {
 	const classes = useStyles();
+	const data = useObservable(props.data, []);
+
 	return (
 		<div className={classes.root + " ListComponent"}>
 			<MaterialTable
@@ -33,6 +37,7 @@ export const RequestListComponent = (props) => {
 					}},
 					{ title: 'What', field: 'what' },
 					{ title: 'Constraints', render: (row) =>  {
+						debugger;
 						if (!row.constraints) {
 							return;
 						}
@@ -43,7 +48,7 @@ export const RequestListComponent = (props) => {
 					{ title: 'Where', field: 'where' },
 					{ title: 'Priority', field: 'priority' }
 				]}
-				data={props.data}
+				data={data}
 				title="Requests"
 				options={{
 					filtering: true

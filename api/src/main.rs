@@ -4,6 +4,7 @@
 #[macro_use] extern crate diesel;
 extern crate redis;
 extern crate dotenv;
+extern crate geo;
 
 mod db_models;
 mod cors_fairing;
@@ -17,13 +18,10 @@ fn index() -> &'static str {
     "Hello, world!"
 }
 
-#[get("/request")]
-fn request() -> &'static str {
-    "Hello, world!"
-}
-
 fn main() {
-    let mut server = rocket::ignite().mount("/", routes![index]);
+    let mut server = rocket::ignite().mount("/", routes![
+        index
+    ]);
 
     if envmnt::get_or("DEBUG", "0") != "0" {
         server

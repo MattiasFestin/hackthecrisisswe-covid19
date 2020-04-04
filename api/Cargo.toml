@@ -13,6 +13,6 @@ scrypt = "0.2.0"
 envmnt = "0.8.1"
 uuid = "0.8"
 diesel = { version = "1.4.4", features = ["postgres"] }
-# diesel = { "1.4.4", features = ["postgres"] }
 redis = "0.15.1"
 dotenv = "0.15.0"
+geo = "0.13.0"

@@ -49,9 +49,9 @@ CREATE TABLE public.transaction_types
 
 INSERT INTO public.transaction_types (id, name) VALUES
 (1, 'Work'),
-(2, 'Transport'),
-(3, 'Production'),
-(4, 'Material');
+(2, 'Material'),
+(3, 'Transport'),
+(4, 'Production');
 
 CREATE TABLE  public.transaction_types
 (

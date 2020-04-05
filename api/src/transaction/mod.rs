@@ -2,6 +2,7 @@ use std::time::SystemTime;
 use serde::Serialize;
 use uuid::Uuid;
 // use rocket_contrib::uuid::Uuid;
+use rocket_contrib::json::Json;
 use crate::diesel::*;
 use crate::view_models::*;
 
@@ -83,6 +84,43 @@ fn getConstraint(transaction_id: uuid::Uuid, db: &PgConnection) -> Vec<VM_Constr
         .collect();
 }
 
+fn mapToViewmodel(rec: &crate::db_models::Transaction, db: &PgConnection) -> VM_Transaction {
+    let mut someAdd: Option<crate::geoencoding::Address> = None;
+    match getAddress(rec.lat, rec.lng) {
+        Ok(addr) => {
+            println!("OK: {:?}", addr);
+            someAdd = addr;
+        }
+        Err(err) => {
+            println!("ERR: {}", err);
+        }
+        _ => {
+            println!("unkown err");
+        }
+    }
+
+    return VM_Transaction {
+        id: rec.id,
+        created: rec.created,
+        modified: rec.modified,
+        deleted: rec.deleted,
+        row_version: rec.row_version,
+    
+        transaction_direction_id: rec.transaction_direction_id,
+        transaction_type_id: rec.transaction_type_id,
+    
+        lat: rec.lat,
+        lng: rec.lng,
+
+        what: rec.what.clone(),
+        r#where: someAdd,
+        
+        priority: rec.priority,
+        
+        constraints: getConstraint(rec.id, &db),
+    };
+}
+
 #[get("/transactions")]
 pub fn getTransactionList() -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
     use crate::schema::transactions::dsl::*;
@@ -134,3 +172,65 @@ pub fn getTransactionList() -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
         .collect()
     );
 }
+
+#[put("/transaction", format = "json", data = "<data>")]
+pub fn insertTransaction(data: Json<VM_Insert_Transaction>) -> rocket_contrib::json::Json<VM_Transaction> {
+    use crate::schema::transactions::dsl::*;
+
+    let con = crate::apihelper::connect();
+
+    let new_transaction = crate::db_models::Transaction {
+        id: uuid::Uuid::new_v4(),
+        created: SystemTime::now(),
+        modified: SystemTime::now(),
+        deleted: None,
+        row_version: 1,
+
+        transaction_direction_id: data.transaction_direction_id,
+        transaction_type_id: data.transaction_type_id,
+
+        lat: data.lat,
+        lng: data.lng,
+
+        what: data.what.clone(),
+        priority: data.priority,
+    };
+
+    diesel::insert_into(transactions)
+        .values(&new_transaction)
+        .execute(&con.db)
+        .expect("Error saving new post");
+
+    return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, &con.db));
+}
+
+// #[post("/transaction", format = "json", data = "<data>")]
+// pub fn insertTransaction(data: Json<VM_Transaction>) -> rocket_contrib::json::Json<VM_Transaction> {
+//     use crate::schema::transactions::dsl::*;
+
+//     let con = crate::apihelper::connect();
+
+//     let new_transaction = crate::db_models::Transaction {
+//         id: uuid::Uuid::new_v4(),
+//         created: SystemTime::now(),
+//         modified: SystemTime::now(),
+//         deleted: None,
+//         row_version: 1,
+
+//         transaction_direction_id: data.transaction_direction_id,
+//         transaction_type_id: data.transaction_type_id,
+
+//         lat: data.lat,
+//         lng: data.lng,
+
+//         what: data.what.clone(),
+//         priority: data.priority,
+//     };
+
+//     diesel::update(transactions)
+//         .values(&new_transaction)
+//         .execute(&con.db)
+//         .expect("Error saving new post");
+
+//     return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, &con.db));
+// }

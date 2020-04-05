@@ -26,7 +26,8 @@ fn main() {
     let mut server = rocket::ignite().mount("/", routes![
         index,
         crate::transaction::getTransaction,
-        crate::transaction::getTransactionList
+        crate::transaction::getTransactionList,
+        crate::transaction::insertTransaction
     ]);
 
     if envmnt::get_or("DEBUG", "0") != "0" {

@@ -44,7 +44,9 @@ export const RequestListComponent = (props) => {
 							{row.constraints.map((c, index) => <li key={index}>{ConstraintTypeOpRender[c.op]} {c.value} {c.unit}</li>)}
 						</ul>;
 					}},
-					{ title: 'Where', field: 'where' },
+					{ title: 'Where', field: 'where', render: (row) =>  {
+						return JSON.stringify(row.where);
+					}},
 					{ title: 'Priority', field: 'priority' }
 				]}
 				data={data}

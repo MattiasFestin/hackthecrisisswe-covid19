@@ -112,10 +112,10 @@ export const MapComponent = (props) => {
 	return (
 		<div className={classes.root}>
 			<ButtonGroup color="primary" aria-label="outlined primary button group" className={classes.buttonGroup}>
-				<Button color={showKomuner ? 'primary' : 'secondary'} className={classes.button} onClick={() => {setShowKomuner(!showKomuner)}}>Komuner</Button>
-				<Button color={showRegioner ? 'primary' : 'secondary'} className={classes.button} onClick={() => {setShowRegioner(!showRegioner)}}>Regioner</Button>
+				<Button color={showRegioner ? 'primary' : 'secondary'} className={classes.button} onClick={() => {setShowRegioner(!showRegioner)}}>County</Button>
+				<Button color={showKomuner ? 'primary' : 'secondary'} className={classes.button} onClick={() => {setShowKomuner(!showKomuner)}}>Municipalities</Button>
 			</ButtonGroup>
-			&nbsp;&nbsp;<span>Region:</span>&nbsp;
+			&nbsp;&nbsp;<span>County:</span>&nbsp;
 			<Select
 				className={classes.filterSelect}
 				label="Description"
@@ -123,7 +123,7 @@ export const MapComponent = (props) => {
 			>
 				{props.regioner && props.regioner.features && props.regioner.features.map(f => <MenuItem key={'region' + f.properties.FA_kod} value={f.properties.FA_namn}>{f.properties.FA_namn}</MenuItem>)}
 			</Select>
-			&nbsp;&nbsp;<span>Komun:</span>&nbsp;
+			&nbsp;&nbsp;<span>Municipality:</span>&nbsp;
 			<Select
 				className={classes.filterSelect}
 				label="Description"
@@ -163,7 +163,7 @@ export const MapComponent = (props) => {
 					.filter(row => row.transaction_type_id === 2)
 					.map((row, index) => {
 						const scale = row.priority / 100
-						return <Circle key={index} center={[row.lat, row.lng]} radius={10000} />;
+						return <Circle key={index} center={[row.lat, row.lng]} radius={row.constraints.filter(x => x.unit === 'km' && [5,8].includes(x.op))[0].value*1000} />;
 					})}
 				{showKomuner && props.komuner && props.komuner.features && props.komuner.features.map(f => <GeoJSON  opacity={0.5} color={chroma.random().darken()} key={'komun' + f.properties.KnKod} data={f} />)}
 				{showRegioner && props.regioner && props.regioner.features && props.regioner.features.map(f => <GeoJSON  opacity={0.5} color={chroma.random().darken()} key={'region' + f.properties.FA_kod} data={f} />)}

@@ -42,16 +42,30 @@ export const ConstraintTypeOpEnum = [
     'numeric_lt'
 ];
 
-export const ConstraintTypeOpRender = {
-    bool_eq: '=',
+export const ConstraintTypeOpRender = [
+    '=',
 
-    list_all: 'all',
-    list_some: 'some',
+    'all',
+    'some',
 	
-	numeric_nq: '≠',
-    numeric_eq: '=',
-    numeric_leq: '≤',
-    numeric_geq: '≥',
-    numeric_gt: '>',
-    numeric_lt: '<'
-};
+	'≠',
+    '=',
+    '≤',
+    '≥',
+    '>',
+    '<'
+];
+
+// {
+//     bool_eq: '=',
+
+//     list_all: 'all',
+//     list_some: 'some',
+	
+// 	numeric_nq: '≠',
+//     numeric_eq: '=',
+//     numeric_leq: '≤',
+//     numeric_geq: '≥',
+//     numeric_gt: '>',
+//     numeric_lt: '<'
+// };

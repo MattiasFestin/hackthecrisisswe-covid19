@@ -26,9 +26,11 @@ pub fn getTransaction(id: rocket_contrib::uuid::Uuid) -> rocket_contrib::json::J
     return rocket_contrib::json::Json(None);
 }
 
-fn getConstraint(transaction_id: uuid::Uuid, db: &PgConnection) -> Vec<VM_Constraint> {
-    let mut results: Vec<crate::db_models::Transaction_Constraint> = crate::schema::transactions_constraints::table
-        .find(transaction_id)
+fn getConstraint(parent_id: uuid::Uuid, db: &PgConnection) -> Vec<VM_Constraint> {
+    use crate::schema::transactions_constraints::dsl::*;
+
+    let mut results: Vec<crate::db_models::Transaction_Constraint> = transactions_constraints
+        .filter(transactions_id.eq(parent_id))
         .load::<crate::db_models::Transaction_Constraint>(db)
         .expect("Error loading posts");
     

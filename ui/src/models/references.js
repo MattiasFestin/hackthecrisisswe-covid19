@@ -3,6 +3,11 @@ export const TransactionDirEnum = [
 	'Offer'
 ];
 
+export const TransactionDirIcons = [
+	'exclamation-triangle',
+	'hands-helping'
+];
+
 export const TransactionTypesEnum = [
 	'Work',
     'Material',

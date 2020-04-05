@@ -1,12 +1,27 @@
 import React, { useState, useRef } from 'react';
+
+import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Modal from '@material-ui/core/Modal';
+import Typography from '@material-ui/core/Typography';
+import Slider from '@material-ui/core/Slider';
+import Paper from '@material-ui/core/Paper';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import { makeStyles } from '@material-ui/core/styles';
-import { Map, Marker, TileLayer, GeoJSON } from 'react-leaflet'
+import { Map, Marker, TileLayer, GeoJSON, Circle } from 'react-leaflet'
 import chroma from 'chroma-js';
 import { useObservable } from 'react-use';
 import 'leaflet.icon.glyph';
 
 
-import { TransactionTypesIcons } from '../models/references'
+import { TransactionTypesIcons, TransactionTypesEnum, TransactionDirEnum, TransactionDirIcons } from '../models/references'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -15,35 +30,124 @@ const useStyles = makeStyles((theme) => ({
   },
   map: {
 	flexGrow: 1,
-	height: 'calc(100% - 20px)'
+	height: 'calc(100% - 30px)'
+  },
+  buttonGroup: {
+	margin: 5
   },
   button: {
 	flexGrow: 1,
 	marginLeft: 20
   },
+  modal: {
+		width: 500,
+		height: 600,
+		top: `50%`,
+		margin:'auto',
+		// left: `50%`,
+		// transform: `translate(50%, 50%)`,
+		// position: 'fixed'
+  },
+  formControl: {
+	margin: theme.spacing(1),
+	minWidth: 120,
+  },
+  buttons: {
+	margin: theme.spacing(1),
+	minWidth: 120,
+	'& > *': {
+		margin: theme.spacing(1),
+	},
+  },
+  filterSelect: {
+	  width: 200
+  }
 }));
 
 const colorScale = chroma.scale(['#0b994b', '#d4111b']);
 
 export const MapComponent = (props) => {
 	const position = [59.3293, 18.0686];
-	const data = useObservable(props.data, []);
+	const data = useObservable(props.transactionService.get$, []);
 	const mapRef = useRef(null);
+	const [open, setOpen] = useState(false);
+	
+	//New data
+	const [dir, setDir] = useState(0);
+	const [latlng, setLatlng] = useState({lat: 0, lng: 0});
+	const [priority, setPriority] = useState(0);
+	const [type, setType] = useState(0);
+	const [description, setDescription] = useState('');
 
 	const [showKomuner, setShowKomuner] = useState(false);
-	const [showRegioner, setShowRegioner] = useState(false);
+	const [showRegioner, setShowRegioner] = useState(true);
 
-	debugger;
+	const handleClose = () => {
+		setOpen(false);
+	};
+
+	const handleSave = () => {
+		const data = {
+			transaction_direction_id: dir,
+			transaction_type_id: type,
+			priority,
+			what: description,
+			lat: latlng.lat,
+			lng: latlng.lng,
+			constraints: []
+		};
+
+		props.transactionService.exec.next({
+			action: 'insert',
+			data
+		});
+		setOpen(false);
+	};
+
+	if (props.komuner.features) {
+		console.table(props.komuner.features[0].properties);
+	}
 
 	const classes = useStyles();
 	return (
 		<div className={classes.root}>
-			<button className={classes.button} onClick={() => {setShowKomuner(!showKomuner)}}>Komuner</button>
-			<button className={classes.button} onClick={() => {setShowRegioner(!showRegioner)}}>Regioner</button>
-			<Map ref={mapRef} className={classes.map} center={position} zoom={13}>
+			<ButtonGroup color="primary" aria-label="outlined primary button group" className={classes.buttonGroup}>
+				<Button color={showKomuner ? 'primary' : 'secondary'} className={classes.button} onClick={() => {setShowKomuner(!showKomuner)}}>Komuner</Button>
+				<Button color={showRegioner ? 'primary' : 'secondary'} className={classes.button} onClick={() => {setShowRegioner(!showRegioner)}}>Regioner</Button>
+			</ButtonGroup>
+			&nbsp;&nbsp;<span>Region:</span>&nbsp;
+			<Select
+				className={classes.filterSelect}
+				label="Description"
+				value={'Stockholm'}
+			>
+				{props.regioner && props.regioner.features && props.regioner.features.map(f => <MenuItem key={'region' + f.properties.FA_kod} value={f.properties.FA_namn}>{f.properties.FA_namn}</MenuItem>)}
+			</Select>
+			&nbsp;&nbsp;<span>Komun:</span>&nbsp;
+			<Select
+				className={classes.filterSelect}
+				label="Description"
+			>
+				{props.komuner && props.komuner.features && props.komuner.features.map(f => <MenuItem key={'komun' + f.properties.KnKod} value={f.properties.KnNamn}>{f.properties.KnNamn}</MenuItem>)}
+			</Select>
+			<Map
+				ref={mapRef}
+				className={classes.map}
+				center={position}
+				zoom={11}
+				onclick={(e) => {
+					// debugger;
+					setOpen(true);
+					setLatlng(e.latlng);
+					setPriority(0);
+					setDir(0);
+					setDescription('');
+					setType(0);
+				}}
+			>
 				<TileLayer
-				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-				attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
+					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+					attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
 				/>
 				{/* <Marker position={position}> */}
 				{data.map((row, index) => {
@@ -55,11 +159,104 @@ export const MapComponent = (props) => {
 						glyph: TransactionTypesIcons[row.transaction_type_id]
 					})} />;
 				})}
-				{/* <Popup>A pretty CSS3 popup.<br />Easily customizable.</Popup> */}
-				{/* </Marker> */}
+				{data
+					.filter(row => row.transaction_type_id === 2)
+					.map((row, index) => {
+						const scale = row.priority / 100
+						return <Circle key={index} center={[row.lat, row.lng]} radius={10000} />;
+					})}
 				{showKomuner && props.komuner && props.komuner.features && props.komuner.features.map(f => <GeoJSON  opacity={0.5} color={chroma.random().darken()} key={'komun' + f.properties.KnKod} data={f} />)}
 				{showRegioner && props.regioner && props.regioner.features && props.regioner.features.map(f => <GeoJSON  opacity={0.5} color={chroma.random().darken()} key={'region' + f.properties.FA_kod} data={f} />)}
 			</Map>
+			{/* <button type="button" onClick={handleOpen}>
+			Open Modal
+			</button> */}
+			<Modal
+				open={open}
+				onClose={handleClose}
+				aria-labelledby="simple-modal-title"
+				aria-describedby="simple-modal-description"
+				className={classes.modal}
+				style={{display:'flex',alignItems:'center',justifyContent:'center'}}
+			>
+				<Paper style={{display: 'flex', flexWrap: 'wrap', width: '100%', height: '100%', padding: 20}}>
+					<FormControl fullWidth className={classes.formControl}>
+						<InputLabel>Direction</InputLabel>
+						<Select
+							value={dir}
+							onChange={(e, newDir) => {
+								setDir(newDir.props.value);
+							}}
+						>
+							{TransactionDirEnum.map((text, index) => <MenuItem key={index} value={index}>
+								<FontAwesomeIcon icon={TransactionDirIcons[index]} /> &nbsp; {text}	
+							</MenuItem>)}
+						</Select>
+					</FormControl>
+					<FormControl fullWidth className={classes.formControl}>
+						<Typography id="discrete-slider" gutterBottom>
+							Priority
+						</Typography>
+						<Slider
+							defaultValue={0}
+							valueLabelDisplay="auto"
+							step={5}
+							marks
+							min={0}
+							max={100}
+							value={priority}
+							onChange={(e, newPriority) => {
+								setPriority(newPriority);
+							}}
+						/>
+					</FormControl>
+					<FormControl fullWidth className={classes.formControl}>
+						<InputLabel>Type</InputLabel>
+						<Select
+							value={type}
+							onChange={(e, newType) => {
+								setType(newType.props.value);
+							}}
+						>
+							{TransactionTypesEnum.map((text, index) => <MenuItem key={index} value={index}>
+								<FontAwesomeIcon icon={TransactionTypesIcons[index]} /> &nbsp; {text}
+							</MenuItem>)}
+						</Select>
+					</FormControl>
+					<FormControl fullWidth className={classes.formControl}>
+						<TextField
+							label="Description"
+							multiline
+							rows="4"
+							value={description}
+							onChange={(e) => {
+								setDescription(e.target.value);
+							}}
+						/>
+					</FormControl>
+					<FormControl fullWidth className={classes.formControl}>
+						<TextField
+							label="Position"
+							// multiline
+							// rows="4"
+							value={latlng}
+							readonly
+							// onChange={(e, newDescription) => {
+							// 	setDescription(newDescription);
+							// }}
+						/>
+					</FormControl>
+					<FormControl fullWidth className={classes.buttons}>
+						<Button variant="contained" color="primary" onClick={handleSave}>
+							Save
+						</Button>
+						<Button variant="contained" color="secondary" onClick={handleClose}>
+							Abort
+						</Button>
+					</FormControl>
+				</Paper>
+			{/* {body} */}
+			</Modal>
 		</div>
 	);
 }

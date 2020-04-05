@@ -20,40 +20,7 @@ pub fn getTransaction(id: rocket_contrib::uuid::Uuid) -> rocket_contrib::json::J
         .expect("Error loading posts");
 
     if let Some(rec) = results.pop() {
-        let mut someAdd: Option<crate::geoencoding::Address> = None;
-        match getAddress(rec.lat, rec.lng) {
-            Ok(addr) => {
-                println!("OK: {:?}", addr);
-                someAdd = addr;
-            }
-            Err(err) => {
-                println!("ERR: {}", err);
-            }
-            _ => {
-                println!("unkown err");
-            }
-        }
-
-        return rocket_contrib::json::Json(Some(VM_Transaction {
-            id: rec.id,
-            created: rec.created,
-            modified: rec.modified,
-            deleted: rec.deleted,
-            row_version: rec.row_version,
-        
-            transaction_direction_id: rec.transaction_direction_id,
-            transaction_type_id: rec.transaction_type_id,
-        
-            lat: rec.lat,
-            lng: rec.lng,
-
-            priority: rec.priority,
-
-            what: rec.what.clone(),
-            r#where: someAdd,//String::from("Hello, Rust!"),
-        
-            constraints: getConstraint(rec.id, &con.db),
-        }));
+        return rocket_contrib::json::Json(Some(mapToViewmodel(&rec, &con)));
     }
     
     return rocket_contrib::json::Json(None);
@@ -84,9 +51,9 @@ fn getConstraint(transaction_id: uuid::Uuid, db: &PgConnection) -> Vec<VM_Constr
         .collect();
 }
 
-fn mapToViewmodel(rec: &crate::db_models::Transaction, db: &PgConnection) -> VM_Transaction {
+fn mapToViewmodel(rec: &crate::db_models::Transaction, con: &crate::apihelper::ApiIO) -> VM_Transaction {
     let mut someAdd: Option<crate::geoencoding::Address> = None;
-    match getAddress(rec.lat, rec.lng) {
+    match getAddress(con, rec.lat, rec.lng) {
         Ok(addr) => {
             println!("OK: {:?}", addr);
             someAdd = addr;
@@ -117,7 +84,7 @@ fn mapToViewmodel(rec: &crate::db_models::Transaction, db: &PgConnection) -> VM_
         
         priority: rec.priority,
         
-        constraints: getConstraint(rec.id, &db),
+        constraints: getConstraint(rec.id, &con.db),
     };
 }
 
@@ -134,40 +101,7 @@ pub fn getTransactionList() -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
 
     return rocket_contrib::json::Json(results.iter()
         .map(|rec| {
-            let mut someAdd: Option<crate::geoencoding::Address> = None;
-            match getAddress(rec.lat, rec.lng) {
-                Ok(addr) => {
-                    println!("OK: {:?}", addr);
-                    someAdd = addr;
-                }
-                Err(err) => {
-                    println!("ERR: {}", err);
-                }
-                _ => {
-                    println!("unkown err");
-                }
-            }
-
-            return VM_Transaction {
-                id: rec.id,
-                created: rec.created,
-                modified: rec.modified,
-                deleted: rec.deleted,
-                row_version: rec.row_version,
-            
-                transaction_direction_id: rec.transaction_direction_id,
-                transaction_type_id: rec.transaction_type_id,
-            
-                lat: rec.lat,
-                lng: rec.lng,
-
-                what: rec.what.clone(),
-                r#where: someAdd,
-                
-                priority: rec.priority,
-                
-                constraints: getConstraint(rec.id, &con.db),
-            };
+            return mapToViewmodel(&rec, &con);
         })
         .collect()
     );
@@ -201,36 +135,5 @@ pub fn insertTransaction(data: Json<VM_Insert_Transaction>) -> rocket_contrib::j
         .execute(&con.db)
         .expect("Error saving new post");
 
-    return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, &con.db));
+    return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, &con));
 }
-
-// #[post("/transaction", format = "json", data = "<data>")]
-// pub fn insertTransaction(data: Json<VM_Transaction>) -> rocket_contrib::json::Json<VM_Transaction> {
-//     use crate::schema::transactions::dsl::*;
-
-//     let con = crate::apihelper::connect();
-
-//     let new_transaction = crate::db_models::Transaction {
-//         id: uuid::Uuid::new_v4(),
-//         created: SystemTime::now(),
-//         modified: SystemTime::now(),
-//         deleted: None,
-//         row_version: 1,
-
-//         transaction_direction_id: data.transaction_direction_id,
-//         transaction_type_id: data.transaction_type_id,
-
-//         lat: data.lat,
-//         lng: data.lng,
-
-//         what: data.what.clone(),
-//         priority: data.priority,
-//     };
-
-//     diesel::update(transactions)
-//         .values(&new_transaction)
-//         .execute(&con.db)
-//         .expect("Error saving new post");
-
-//     return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, &con.db));
-// }

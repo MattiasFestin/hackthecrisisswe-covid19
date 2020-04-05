@@ -73,8 +73,8 @@ pub struct Transaction {
     pub deleted: Option<SystemTime>,
     pub row_version: i64,
 
-    pub transaction_direction_id: i64,
     pub transaction_type_id: i64,
+    pub transaction_direction_id: i64,
 
     pub lat: f32,
     pub lng: f32,

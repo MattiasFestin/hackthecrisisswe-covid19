@@ -2,6 +2,7 @@ use dotenv::dotenv;
 use std::env;
 use std::collections::HashMap;
 use serde::{Serialize,Deserialize};
+use crate::redis::Commands;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 struct Matchquality {
@@ -91,14 +92,15 @@ struct Location {
     pub matchquality: Option<Matchquality>,
 }
 
-pub fn getAddress(lat: f32, lng: f32) -> Result<Option<Address>, Box<dyn std::error::Error>> {
-	dotenv().ok();
+pub fn getAddress(con: &crate::apihelper::ApiIO, lat: f32, lng: f32) -> Result<Option<Address>, Box<dyn std::error::Error>> {
+    dotenv().ok();
+
+       let cord = format!("{},{}", lat, lng);
+    // let cached: Address = redisCon.get(cord)?;
 
 	let locationiq_key = env::var("LocationIQKey")
 		.expect("LocationIQKey must be set");
 
-	// let client = Client::new();
-	// let path: String = ;
 	let url = format!("https://eu1.locationiq.com/v1/reverse.php?key={}&lat={}&lon={}&format=json",
 		locationiq_key,
 		lat,
@@ -106,31 +108,9 @@ pub fn getAddress(lat: f32, lng: f32) -> Result<Option<Address>, Box<dyn std::er
 	);
 	let resp = reqwest::blocking::get(&url)?
     	.json::<Location>()?;
-	// let uri = hyper::http::Uri::builder()
-	// 	.scheme("https")
-	// 	.authority("eu1.locationiq.com")
-	// 	.path_and_query(path.as_str())
-	// 	.build()
-	// 	.unwrap();
 
-	// let res = async {
-	// 	let res = client.get(uri).await.unwrap();
-
-	// 	let (parts, body) = res.into_parts();
-
-	// 	println!("{:?}", body);
-	// };
-
-	// res.body().concat2().and_then(move |body: Chunk| {
-	// 	let foo = serde_json::from_slice::<Foo>(&body).unwrap();
-	// })
-
-	// let body = req.into_body().concat2().wait().unwrap().into_bytes();
-	// let s: Status = serde_json::from_slice(&body).unwrap();
-	
-	// return Box::new(body.concat2().and_then(move |bod| {
-
-	// });
 
 	return Ok(resp.address);
 }
+
+// checkCache()

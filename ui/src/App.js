@@ -12,7 +12,8 @@ import { AppBarComponent } from './components/AppBarComponent';
 import { RequestListComponent } from './components/RequestListComponent';
 import { MapComponent } from './components/MapComponent';
 
-import { transactionListEpic } from './epics/TransactionEpic';
+// import { transactionListEpic } from './service/transactionService';
+import { transactionService } from './service/transactionService';
 
 library.add(fas)
 
@@ -24,8 +25,13 @@ export default function App() {
   const theme = createMuiTheme({
     //TODO:
   });
-
-  const data$ = transactionListEpic();
+  setTimeout(() => {
+    transactionService.exec.next({action: 'getList'});
+  }, 1000);
+  // transactionService.get$.next(['test'])
+  // console.log(transactionService);
+  // debugger;
+  // const data$ = transactionListEpic();
   // const data = await ;
 
   // const data = [
@@ -60,14 +66,12 @@ export default function App() {
   //     priority: 50
   //   }
   // ];
-
+/* <React.StrictMode> */
   return (
-    <React.StrictMode>
-      <ThemeProvider theme={theme}>
-        <AppBarComponent />
-        <MapComponent  data={data$} komuner={komuner} regioner={regioner} />
-        <RequestListComponent data={data$} />
-      </ThemeProvider>
-    </React.StrictMode>
+    <ThemeProvider theme={theme}>
+      <AppBarComponent />
+      <MapComponent  transactionService={transactionService} komuner={komuner} regioner={regioner} />
+      <RequestListComponent transactionService={transactionService} />
+    </ThemeProvider>
   );
 };

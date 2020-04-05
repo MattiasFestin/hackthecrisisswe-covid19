@@ -11,7 +11,7 @@
 }
 
 #root {
-  height: calc(100% - 64px);
+  height: calc(100% - 64px); /* 64 */
   width: 100%;
   display: block;
   position: absolute;
@@ -20,7 +20,9 @@
 body {
   overflow: hidden;
 }
-
+.ListComponent {
+    height: calc(50vw - 389px) !important;
+}
 .ListComponent > div > div:nth-child(2) {
   height: calc(100% - 117px);
 }

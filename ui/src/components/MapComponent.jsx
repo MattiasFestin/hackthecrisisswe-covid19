@@ -21,7 +21,17 @@ import { useObservable } from 'react-use';
 import 'leaflet.icon.glyph';
 
 
-import { TransactionTypesIcons, TransactionTypesEnum, TransactionDirEnum, TransactionDirIcons } from '../models/references'
+import { TransactionTypesIcons, TransactionTypesEnum, TransactionDirEnum, TransactionDirIcons } from '../models/references';
+
+var ColorScheme = require('color-scheme-js');
+
+var scheme = new ColorScheme;
+scheme.from_hue(21)         // Start the scheme 
+      .scheme('tetrade')     // Use the 'triade' scheme, that is, colors
+                            // selected from 3 points equidistant around
+                            // the color wheel.
+	  .variation('pastel');   // Use the 'soft' color variation
+var colors = scheme.colors().map(x => chroma('#' + x).darken().toString());
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -104,10 +114,6 @@ export const MapComponent = (props) => {
 		setOpen(false);
 	};
 
-	if (props.komuner.features) {
-		console.table(props.komuner.features[0].properties);
-	}
-
 	const classes = useStyles();
 	return (
 		<div className={classes.root}>
@@ -165,8 +171,8 @@ export const MapComponent = (props) => {
 						const scale = row.priority / 100
 						return <Circle key={index} center={[row.lat, row.lng]} radius={row.constraints.filter(x => x.unit === 'km' && [5,8].includes(x.op))[0].value*1000} />;
 					})}
-				{showKomuner && props.komuner && props.komuner.features && props.komuner.features.map(f => <GeoJSON  opacity={0.5} color={chroma.random().darken()} key={'komun' + f.properties.KnKod} data={f} />)}
-				{showRegioner && props.regioner && props.regioner.features && props.regioner.features.map(f => <GeoJSON  opacity={0.5} color={chroma.random().darken()} key={'region' + f.properties.FA_kod} data={f} />)}
+				{showKomuner && props.komuner && props.komuner.features && props.komuner.features.map(f => <GeoJSON  opacity={0.5} color={colors[parseInt(f.properties.KnKod, 10) % colors.length]} key={'komun' + f.properties.KnKod} data={f} />)}
+				{showRegioner && props.regioner && props.regioner.features && props.regioner.features.map(f => <GeoJSON  opacity={0.5} color={colors[parseInt(f.properties.FA_kod, 10) % colors.length]} key={'region' + f.properties.FA_kod} data={f} />)}
 			</Map>
 			{/* <button type="button" onClick={handleOpen}>
 			Open Modal

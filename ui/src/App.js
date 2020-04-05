@@ -69,7 +69,7 @@ export default function App() {
 /* <React.StrictMode> */
   return (
     <ThemeProvider theme={theme}>
-      <AppBarComponent />
+      {/* <AppBarComponent /> */}
       <MapComponent  transactionService={transactionService} komuner={komuner} regioner={regioner} />
       <RequestListComponent transactionService={transactionService} />
     </ThemeProvider>

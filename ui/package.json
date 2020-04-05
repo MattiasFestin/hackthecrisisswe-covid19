@@ -12,6 +12,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "chroma-js": "^2.1.0",
+    "color-scheme-js": "^1.0.6",
     "leaflet": "^1.6.0",
     "leaflet.icon.glyph": "^0.2.1",
     "material-table": "^1.57.2",

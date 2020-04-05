@@ -1,0 +1,3 @@
+[submodule "api/locationiq"]
+	path = api/locationiq
+	url = https://github.com/location-iq/locationiq-rust-client.git

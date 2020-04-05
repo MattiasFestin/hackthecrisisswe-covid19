@@ -5,6 +5,7 @@
 extern crate redis;
 extern crate dotenv;
 extern crate geo;
+extern crate reqwest;
 
 mod db_models;
 mod view_models;
@@ -12,6 +13,7 @@ mod cors_fairing;
 mod apihelper;
 mod transaction;
 mod schema;
+mod geoencoding;
 
 use diesel::prelude::*;
 

@@ -5,9 +5,10 @@ use uuid::Uuid;
 use crate::diesel::*;
 use crate::view_models::*;
 
+use crate::geoencoding::*;
+
 #[get("/transaction?<id>")]
 pub fn getTransaction(id: rocket_contrib::uuid::Uuid) -> rocket_contrib::json::Json<Option<VM_Transaction>> {
-    
     let con = crate::apihelper::connect();    
     
     let dbId = Uuid::from_bytes(id.as_bytes()).unwrap();
@@ -17,32 +18,44 @@ pub fn getTransaction(id: rocket_contrib::uuid::Uuid) -> rocket_contrib::json::J
         .load::<crate::db_models::Transaction>(&con.db)
         .expect("Error loading posts");
 
-    return rocket_contrib::json::Json(
-        if let Some(rec) = results.pop() {
-            Some(VM_Transaction {
-                id: rec.id,
-                created: rec.created,
-                modified: rec.modified,
-                deleted: rec.deleted,
-                row_version: rec.row_version,
-            
-                transaction_direction_id: rec.transaction_direction_id,
-                transaction_type_id: rec.transaction_type_id,
-            
-                lat: rec.lat,
-                lng: rec.lng,
-                
-                priority: rec.priority,
-
-                what: rec.what.clone(),
-                r#where: String::from("Hello, Rust!"),
-            
-                constraints: getConstraint(rec.id, &con.db),
-            })
-        } else {
-            None
+    if let Some(rec) = results.pop() {
+        let mut someAdd: Option<crate::geoencoding::Address> = None;
+        match getAddress(rec.lat, rec.lng) {
+            Ok(addr) => {
+                println!("OK: {:?}", addr);
+                someAdd = addr;
+            }
+            Err(err) => {
+                println!("ERR: {}", err);
+            }
+            _ => {
+                println!("unkown err");
+            }
         }
-    );
+
+        return rocket_contrib::json::Json(Some(VM_Transaction {
+            id: rec.id,
+            created: rec.created,
+            modified: rec.modified,
+            deleted: rec.deleted,
+            row_version: rec.row_version,
+        
+            transaction_direction_id: rec.transaction_direction_id,
+            transaction_type_id: rec.transaction_type_id,
+        
+            lat: rec.lat,
+            lng: rec.lng,
+
+            priority: rec.priority,
+
+            what: rec.what.clone(),
+            r#where: someAdd,//String::from("Hello, Rust!"),
+        
+            constraints: getConstraint(rec.id, &con.db),
+        }));
+    }
+    
+    return rocket_contrib::json::Json(None);
 }
 
 fn getConstraint(transaction_id: uuid::Uuid, db: &PgConnection) -> Vec<VM_Constraint> {
@@ -76,13 +89,27 @@ pub fn getTransactionList() -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
 
     let con = crate::apihelper::connect();    
     
-    let results: Vec<crate::db_models::Transaction> = transactions.limit(1)
+    let results: Vec<crate::db_models::Transaction> = transactions
         .load::<crate::db_models::Transaction>(&con.db)
         .expect("Error loading posts");
 
 
     return rocket_contrib::json::Json(results.iter()
         .map(|rec| {
+            let mut someAdd: Option<crate::geoencoding::Address> = None;
+            match getAddress(rec.lat, rec.lng) {
+                Ok(addr) => {
+                    println!("OK: {:?}", addr);
+                    someAdd = addr;
+                }
+                Err(err) => {
+                    println!("ERR: {}", err);
+                }
+                _ => {
+                    println!("unkown err");
+                }
+            }
+
             return VM_Transaction {
                 id: rec.id,
                 created: rec.created,
@@ -97,7 +124,7 @@ pub fn getTransactionList() -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
                 lng: rec.lng,
 
                 what: rec.what.clone(),
-                r#where: String::from("Hello, Rust!"),
+                r#where: someAdd,
                 
                 priority: rec.priority,
                 

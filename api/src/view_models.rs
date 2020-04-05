@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 use serde::{Serialize,Deserialize};
+// use crate::geoencoding::Address;
 
 #[derive(Serialize, Deserialize)]
 pub struct VM_Transaction {
@@ -15,7 +16,7 @@ pub struct VM_Transaction {
     pub priority: i64,
 
     pub what: String,
-    pub r#where: String,
+    pub r#where: Option<crate::geoencoding::Address>,
 
     pub lat: f32,
     pub lng: f32,

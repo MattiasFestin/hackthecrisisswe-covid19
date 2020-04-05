@@ -37,12 +37,11 @@ export const RequestListComponent = (props) => {
 					}},
 					{ title: 'What', field: 'what' },
 					{ title: 'Constraints', render: (row) =>  {
-						debugger;
 						if (!row.constraints) {
 							return;
 						}
 						return <ul>
-							{row.constraints.map(c => <li>{ConstraintTypeOpRender[c.op]} {c.value} {c.unit}</li>)}
+							{row.constraints.map((c, index) => <li key={index}>{ConstraintTypeOpRender[c.op]} {c.value} {c.unit}</li>)}
 						</ul>;
 					}},
 					{ title: 'Where', field: 'where' },

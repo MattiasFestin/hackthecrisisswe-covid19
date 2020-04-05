@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
@@ -7,6 +7,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
+
 import { AppBarComponent } from './components/AppBarComponent';
 import { RequestListComponent } from './components/RequestListComponent';
 import { MapComponent } from './components/MapComponent';
@@ -14,6 +15,10 @@ import { MapComponent } from './components/MapComponent';
 import { transactionListEpic } from './epics/TransactionEpic';
 
 library.add(fas)
+
+const komuner = require('./data/komun.json');
+const regioner = require('./data/fa_region.json');
+
 
 export default function App() {
   const theme = createMuiTheme({
@@ -60,7 +65,7 @@ export default function App() {
     <React.StrictMode>
       <ThemeProvider theme={theme}>
         <AppBarComponent />
-        <MapComponent  data={data$} />
+        <MapComponent  data={data$} komuner={komuner} regioner={regioner} />
         <RequestListComponent data={data$} />
       </ThemeProvider>
     </React.StrictMode>

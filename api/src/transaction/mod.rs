@@ -142,3 +142,46 @@ pub fn insertTransaction(data: Json<VM_Insert_Transaction>, db: crate::db::DbCon
 
     return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, db, &mut redis));
 }
+
+#[post("/transaction", format = "json", data = "<data>")]
+pub fn updateTransaction(data: Json<VM_Update_Transaction>, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> () {
+    use crate::schema::transactions::dsl::*;
+
+    let db = &*db;
+    let mut redis = &mut *redis;
+
+    let new_transaction = crate::db_models::Transaction {
+        // id: uuid::Uuid::new_v4(),
+        id: data.id,
+        created: data.created,
+        modified: SystemTime::now(),
+        deleted: None,
+        row_version: data.row_version + 1,
+
+        transaction_direction_id: data.transaction_direction_id,
+        transaction_type_id: data.transaction_type_id,
+
+        lat: data.lat,
+        lng: data.lng,
+
+        what: data.what.clone(),
+        priority: data.priority,
+    };
+
+    diesel::update(transactions.find(id))
+        .set(&new_transaction)
+        .execute(db)
+        .expect("Error saving new post");
+}
+
+#[delete("/transaction?<id>")]
+pub fn deleteTransaction(id: rocket_contrib::uuid::Uuid, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> () {
+    use crate::schema::transactions::dsl::*;
+
+    let db = &*db;
+    let mut redis = &mut *redis;
+
+    diesel::delete(transactions.find(id))
+        .execute(db)
+        .expect("Error saving new post");
+}

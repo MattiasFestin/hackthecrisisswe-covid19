@@ -65,7 +65,7 @@ pub struct Transaction_Constraint {
 //     pub name: String
 // }
 
-#[derive(Queryable, Insertable)]
+#[derive(Queryable, Insertable, AsChangeset)]
 pub struct Transaction {
     pub id: uuid::Uuid,
     pub created: SystemTime,

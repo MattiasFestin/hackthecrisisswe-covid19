@@ -46,6 +46,25 @@ pub struct VM_Insert_Transaction {
     pub constraints: Vec<VM_Constraint>,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct VM_Update_Transaction {
+    pub id: uuid::Uuid,
+    pub created: SystemTime,
+    pub row_version: i64,
+
+    pub transaction_direction_id: i64,
+    pub transaction_type_id: i64,
+
+    pub priority: i64,
+
+    pub what: String,
+
+    pub lat: f32,
+    pub lng: f32,
+
+    pub constraints: Vec<VM_Constraint>,
+}
+
 // impl FromDataSimple for VM_Transaction {
 //     type Error = String;
 

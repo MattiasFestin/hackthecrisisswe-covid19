@@ -2,7 +2,9 @@ use dotenv::dotenv;
 use std::env;
 use std::collections::HashMap;
 use serde::{Serialize,Deserialize};
-use crate::redis::Commands;
+use std::thread;
+use r2d2_redis::redis::Commands;
+
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 struct Matchquality {
@@ -92,25 +94,77 @@ struct Location {
     pub matchquality: Option<Matchquality>,
 }
 
-pub fn getAddress(con: &crate::apihelper::ApiIO, lat: f32, lng: f32) -> Result<Option<Address>, Box<dyn std::error::Error>> {
-    dotenv().ok();
-
-       let cord = format!("{},{}", lat, lng);
-    // let cached: Address = redisCon.get(cord)?;
+pub fn getAddress(lat: f32, lng: f32, redis: &mut r2d2_redis::redis::Connection) -> Result<Option<Address>, Box<dyn std::error::Error>> {
+     dotenv().ok();
 
 	let locationiq_key = env::var("LocationIQKey")
-		.expect("LocationIQKey must be set");
+        .expect("LocationIQKey must be set");
 
-	let url = format!("https://eu1.locationiq.com/v1/reverse.php?key={}&lat={}&lon={}&format=json",
-		locationiq_key,
-		lat,
-		lng
-	);
-	let resp = reqwest::blocking::get(&url)?
-    	.json::<Location>()?;
+    // let mut redis = crate::db::establish_redis_connection().get().unwrap();
+        
+    let key = format!("{},{}", lat, lng);
 
+    let cached: redis::RedisResult<String> = redis.get(&key);
+    match cached {
+        Ok(data) => {
+            let deserialized: Address = serde_json::from_str(&data)?;
+            return Ok(Some(deserialized));
+        },
+        _ => ()
+    }
 
-	return Ok(resp.address);
+    // let redis: &'r r2d2_redis::redis::Connection = redis;
+    // thread::spawn(move || {
+        let url = format!("https://eu1.locationiq.com/v1/reverse.php?key={}&lat={}&lon={}&format=json",
+            locationiq_key,
+            lat,
+            lng
+        );
+
+        let resp = reqwest::blocking::get(&url).unwrap()
+            .json::<Location>().unwrap();
+
+        if let Some(address) = resp.address {
+            let serialized = serde_json::to_string(&address).unwrap();
+            redis.set::<&String, &String, ()>(&key, &serialized).unwrap();
+        }
+    // });
+
+	return Ok(None);
 }
 
-// checkCache()
+// fn getCache<'a, T: serde::Deserialize<'a>>(redis: &redis::Connection, key: String) -> Option<T> {
+//     // let mut con = apiio.redis.get_connection()?;
+
+//     // let data: String = apiio.redis.get<String>(key)?;
+//     // let deserialized: T = serde_json::from_str(&data);
+//     let data: redis::RedisResult<String> = redis.get(&key);
+//     match cached {
+//         Ok(data) => {
+//             let result: Result<T, serde_json::error::Error> = serde_json::from_str(data);
+//             match result {
+//                 Ok(deserialized) => {
+//                     println!("Cache hit");
+//                     return Some(deserialized);
+//                 },
+//                 _ => {
+//                     return None;
+//                 }
+//             }
+//         },
+//         _ => {
+//             return None;
+//         }
+//     }
+
+// //     return Box::new(deserialized);
+// }
+
+// fn setCache<T: serde::Serialize>(apiio: crate::db::ApiIO, data: T, key: String) -> Box<Result<dyn Option,dyn std::error::Error>> {
+//     let serialized = serde_json::to_string(&data).unwrap();
+    
+//     // let mut con = apiio.redis.get_connection()?;
+//     let _ : () = apiio.redis.set(key, serialized)?;
+
+//     return Box::new(None);
+// }

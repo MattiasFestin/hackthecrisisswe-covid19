@@ -55,17 +55,3 @@ export const ConstraintTypeOpRender = [
     '>',
     '<'
 ];
-
-// {
-//     bool_eq: '=',
-
-//     list_all: 'all',
-//     list_some: 'some',
-	
-// 	numeric_nq: '≠',
-//     numeric_eq: '=',
-//     numeric_leq: '≤',
-//     numeric_geq: '≥',
-//     numeric_gt: '>',
-//     numeric_lt: '<'
-// };

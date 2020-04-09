@@ -67,25 +67,12 @@ export const RequestListComponent = (props) => {
 				options={{
 					filtering: true,
 					exportButton: true,
-					pageSize: 1000,
+					pageSize: 100 || data.length,
 				}}
 				editable={{
-					// onRowAdd: newData => new Promise((resolve, reject) => {
-					// 	// setTimeout(() => {
-					// 	//   {
-					// 	// 	const data = this.state.data;
-					// 	// 	data.push(newData);
-					// 	// 	this.setState({ data }, () => resolve());
-					// 	//   }
-					// 	//   resolve()
-					// 	// }, 1000)
-					// 	debugger;
-					// 	props.transactionService.exec({
-					// 		action: 'insert',
-					// 		data: newData
-					// 	});
-					// }),
 					onRowUpdate: (newData, oldData) => new Promise((resolve, reject) => {
+						console.log(newData, oldData);
+						debugger;
 						// setTimeout(() => {
 						//   {
 						// 	const data = this.state.data;

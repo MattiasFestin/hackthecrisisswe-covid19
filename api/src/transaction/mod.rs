@@ -5,28 +5,30 @@ use uuid::Uuid;
 use rocket_contrib::json::Json;
 use crate::diesel::*;
 use crate::view_models::*;
+use rocket::State;
 
 use crate::geoencoding::*;
 
 #[get("/transaction?<id>")]
-pub fn getTransaction(id: rocket_contrib::uuid::Uuid) -> rocket_contrib::json::Json<Option<VM_Transaction>> {
-    let con = crate::apihelper::connect();    
-    
+pub fn getTransaction<'r>(id: rocket_contrib::uuid::Uuid, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<Option<VM_Transaction>> {
+    let db = &*db;
+    let mut redis = &mut *redis;
+
     let dbId = Uuid::from_bytes(id.as_bytes()).unwrap();
-    
+
     let mut results: Vec<crate::db_models::Transaction> = crate::schema::transactions::table
         .find(dbId)
-        .load::<crate::db_models::Transaction>(&con.db)
+        .load::<crate::db_models::Transaction>(db)
         .expect("Error loading posts");
 
     if let Some(rec) = results.pop() {
-        return rocket_contrib::json::Json(Some(mapToViewmodel(&rec, &con)));
+        return rocket_contrib::json::Json(Some(mapToViewmodel(&rec, &db, &mut redis)));
     }
     
     return rocket_contrib::json::Json(None);
 }
 
-fn getConstraint(parent_id: uuid::Uuid, db: &PgConnection) -> Vec<VM_Constraint> {
+fn getConstraint(parent_id: uuid::Uuid, db: &diesel::PgConnection) -> Vec<VM_Constraint> {
     use crate::schema::transactions_constraints::dsl::*;
 
     let mut results: Vec<crate::db_models::Transaction_Constraint> = transactions_constraints
@@ -53,18 +55,17 @@ fn getConstraint(parent_id: uuid::Uuid, db: &PgConnection) -> Vec<VM_Constraint>
         .collect();
 }
 
-fn mapToViewmodel(rec: &crate::db_models::Transaction, con: &crate::apihelper::ApiIO) -> VM_Transaction {
+fn mapToViewmodel<'r>(rec: &crate::db_models::Transaction, db: &'r diesel::PgConnection, redis: &'r mut r2d2_redis::redis::Connection) -> VM_Transaction {
     let mut someAdd: Option<crate::geoencoding::Address> = None;
-    match getAddress(con, rec.lat, rec.lng) {
+    match getAddress(rec.lat, rec.lng, redis) {
         Ok(addr) => {
-            println!("OK: {:?}", addr);
             someAdd = addr;
         }
         Err(err) => {
-            println!("ERR: {}", err);
+            // println!("ERR: {}", err);
         }
         _ => {
-            println!("unkown err");
+            // println!("unkown err");
         }
     }
 
@@ -86,34 +87,36 @@ fn mapToViewmodel(rec: &crate::db_models::Transaction, con: &crate::apihelper::A
         
         priority: rec.priority,
         
-        constraints: getConstraint(rec.id, &con.db),
+        constraints: getConstraint(rec.id, &db),
     };
 }
 
 #[get("/transactions")]
-pub fn getTransactionList() -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
+pub fn getTransactionList(db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
     use crate::schema::transactions::dsl::*;
 
-    let con = crate::apihelper::connect();    
+    let db = &*db;
+    let mut redis = &mut *redis;
     
     let results: Vec<crate::db_models::Transaction> = transactions
-        .load::<crate::db_models::Transaction>(&con.db)
+        .load::<crate::db_models::Transaction>(db)
         .expect("Error loading posts");
 
 
     return rocket_contrib::json::Json(results.iter()
         .map(|rec| {
-            return mapToViewmodel(&rec, &con);
+            return mapToViewmodel(rec, db, &mut redis);
         })
         .collect()
     );
 }
 
 #[put("/transaction", format = "json", data = "<data>")]
-pub fn insertTransaction(data: Json<VM_Insert_Transaction>) -> rocket_contrib::json::Json<VM_Transaction> {
+pub fn insertTransaction(data: Json<VM_Insert_Transaction>, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<VM_Transaction> {
     use crate::schema::transactions::dsl::*;
 
-    let con = crate::apihelper::connect();
+    let db = &*db;
+    let mut redis = &mut *redis;
 
     let new_transaction = crate::db_models::Transaction {
         id: uuid::Uuid::new_v4(),
@@ -134,8 +137,8 @@ pub fn insertTransaction(data: Json<VM_Insert_Transaction>) -> rocket_contrib::j
 
     diesel::insert_into(transactions)
         .values(&new_transaction)
-        .execute(&con.db)
+        .execute(db)
         .expect("Error saving new post");
 
-    return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, &con));
+    return rocket_contrib::json::Json(mapToViewmodel(&new_transaction, db, &mut redis));
 }

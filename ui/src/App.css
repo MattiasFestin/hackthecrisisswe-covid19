@@ -21,8 +21,12 @@ body {
   overflow: hidden;
 }
 .ListComponent {
-    height: calc(50vw - 389px) !important;
+    height: calc(50vh - 32px) !important;
+}
+
+.ListComponent .MuiPaper-elevation2 {
+  box-shadow: none;
 }
 .ListComponent > div > div:nth-child(2) {
-  height: calc(100% - 117px);
+  height: calc(100% - 40px);
 }

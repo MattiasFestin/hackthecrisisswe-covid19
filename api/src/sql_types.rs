@@ -10,8 +10,12 @@ use postgis::ewkb::{Point};
 use postgis::ewkb::{EwkbRead, EwkbWrite};
 use postgis::ewkb::AsEwkbPoint;
 
-#[derive(Debug)]
+#[derive(Debug, SqlType)]
 #[postgres(type_name = "st_point")]
+pub struct ST_Point;
+
+#[derive(Debug, PartialEq, FromSqlRow, AsExpression)]
+#[sql_type = "ST_Point"]
 pub struct PgPoint(pub Point);
 
 impl ToSql<PgPoint, Pg> for PgPoint {

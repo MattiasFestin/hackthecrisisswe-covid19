@@ -1,6 +1,7 @@
 use std::time::SystemTime;
 // use serde::{Serialize, Deserialize};
 use crate::schema::*;
+use crate::sql_types::PgPoint;
 
 #[derive(Queryable)]
 pub struct Users {
@@ -76,9 +77,7 @@ pub struct Transaction {
     pub transaction_type_id: i64,
     pub transaction_direction_id: i64,
 
-    pub point: crate::sql_types::PgPoint,
-    // pub lat: f32,
-    // pub lng: f32,
+    pub point: PgPoint,
 
     pub what: String,
     pub priority: i64,

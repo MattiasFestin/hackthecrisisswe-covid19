@@ -134,8 +134,6 @@ pub fn insertTransaction(data: Json<VMInsertTransaction>, db: crate::db::DbConn,
             y: data.lat,
             srid: None
         }),
-        // lat: data.lat,
-        // lng: data.lng,
 
         what: data.what.clone(),
         priority: data.priority,

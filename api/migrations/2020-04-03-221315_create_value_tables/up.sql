@@ -14,9 +14,7 @@ CREATE TABLE public.transactions
 (
 	"transaction_type_id"		int8					NOT NULL,
 	"transaction_direction_id"	int8					NOT NULL,
-	-- "lat"						REAL					NOT NULL,
-	-- "lng"						REAL					NOT NULL,
-	"point"						ST_POINT				NOT NULL,
+	"point"						st_point				NOT NULL,
 
 	"what"						TEXT					NOT NULL,
 

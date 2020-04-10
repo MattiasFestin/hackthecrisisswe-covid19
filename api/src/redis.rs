@@ -1,13 +1,13 @@
 use std::env;
-use std::sync::Arc;
+// use std::sync::Arc;
 use std::ops::{Deref, DerefMut};
 
-use diesel::prelude::*;
+// use diesel::prelude::*;
 use dotenv::dotenv;
 
 
 use r2d2_redis::{r2d2, RedisConnectionManager};
-use r2d2_redis::redis::Commands;
+// use r2d2_redis::redis::Commands;
 
 use rocket::{Outcome, Request, State};
 use rocket::request::{self, FromRequest};

@@ -76,6 +76,17 @@ clean_ui:
 	rm -rf ./node_modules ./static/* && \
 	popd
 
+clean_migrations:
+	source ./.env && \
+	pushd api && \
+	rm -f src/schema.rs && \
+	diesel setup && \
+	diesel migration run && \
+	popd
+
+# psql -c "UPDATE pg_database SET datallowconn = 'false' WHERE datname = 'squrt'; SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'squrt';" $DATABASE_CLI_URL && \
+# 	psql -c "DROP DATABASE squrt" $DATABASE_CLI_URL && \
+
 ########################################################
 
 run:
@@ -93,3 +104,9 @@ run_api:
 
 run_containers:
 	docker-compose -f ./docker-compose.dev.yml -f ./docker-compose.yml up -d
+
+
+##########################################################
+
+load_env:
+	source ./.env

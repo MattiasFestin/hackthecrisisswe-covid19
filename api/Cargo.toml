@@ -23,6 +23,8 @@ reqwest = { version ="0.10.4", features = ["blocking", "json"] }
 rocket_cors = "0.5.2"
 lifeguard = "0.6.0"
 r2d2_redis = "0.13.0"
+postgis = "0.7.0"
+
 
 [global.limits]
 json = 5242880

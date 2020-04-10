@@ -1,16 +1,17 @@
 use std::time::SystemTime;
-use serde::Serialize;
+// use serde::Serialize;
 use uuid::Uuid;
 // use rocket_contrib::uuid::Uuid;
 use rocket_contrib::json::Json;
 use crate::diesel::*;
 use crate::view_models::*;
-use rocket::State;
+// use rocket::State;
 
+use crate::sql_types::{PgPoint};
 use crate::geoencoding::*;
 
 #[get("/transaction?<id>")]
-pub fn getTransaction<'r>(id: rocket_contrib::uuid::Uuid, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<Option<VM_Transaction>> {
+pub fn getTransaction<'r>(id: rocket_contrib::uuid::Uuid, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<Option<VMTransaction>> {
     let db = &*db;
     let mut redis = &mut *redis;
 
@@ -28,17 +29,17 @@ pub fn getTransaction<'r>(id: rocket_contrib::uuid::Uuid, db: crate::db::DbConn,
     return rocket_contrib::json::Json(None);
 }
 
-fn getConstraint(parent_id: uuid::Uuid, db: &diesel::PgConnection) -> Vec<VM_Constraint> {
+fn getConstraint(parent_id: uuid::Uuid, db: &diesel::PgConnection) -> Vec<VMConstraint> {
     use crate::schema::transactions_constraints::dsl::*;
 
-    let mut results: Vec<crate::db_models::Transaction_Constraint> = transactions_constraints
+    let mut results: Vec<crate::db_models::TransactionConstraint> = transactions_constraints
         .filter(transactions_id.eq(parent_id))
-        .load::<crate::db_models::Transaction_Constraint>(db)
+        .load::<crate::db_models::TransactionConstraint>(db)
         .expect("Error loading posts");
     
     return results.iter()
         .map(|rec| {
-            return VM_Constraint {
+            return VMConstraint {
                 id: rec.id,
                 created: rec.created,
                 modified: rec.modified,
@@ -55,9 +56,9 @@ fn getConstraint(parent_id: uuid::Uuid, db: &diesel::PgConnection) -> Vec<VM_Con
         .collect();
 }
 
-fn mapToViewmodel<'r>(rec: &crate::db_models::Transaction, db: &'r diesel::PgConnection, redis: &'r mut r2d2_redis::redis::Connection) -> VM_Transaction {
+fn mapToViewmodel<'r>(rec: &crate::db_models::Transaction, db: &'r diesel::PgConnection, redis: &'r mut r2d2_redis::redis::Connection) -> VMTransaction {
     let mut someAdd: Option<crate::geoencoding::Address> = None;
-    match getAddress(rec.lat, rec.lng, redis) {
+    match getAddress(rec.point.0.y, rec.point.0.x , redis) {
         Ok(addr) => {
             someAdd = addr;
         }
@@ -69,7 +70,7 @@ fn mapToViewmodel<'r>(rec: &crate::db_models::Transaction, db: &'r diesel::PgCon
         }
     }
 
-    return VM_Transaction {
+    return VMTransaction {
         id: rec.id,
         created: rec.created,
         modified: rec.modified,
@@ -79,8 +80,8 @@ fn mapToViewmodel<'r>(rec: &crate::db_models::Transaction, db: &'r diesel::PgCon
         transaction_direction_id: rec.transaction_direction_id,
         transaction_type_id: rec.transaction_type_id,
     
-        lat: rec.lat,
-        lng: rec.lng,
+        lat: rec.point.0.y,
+        lng: rec.point.0.x,
 
         what: rec.what.clone(),
         r#where: someAdd,
@@ -92,7 +93,7 @@ fn mapToViewmodel<'r>(rec: &crate::db_models::Transaction, db: &'r diesel::PgCon
 }
 
 #[get("/transactions")]
-pub fn getTransactionList(db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<Vec<VM_Transaction>> {
+pub fn getTransactionList(db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<Vec<VMTransaction>> {
     use crate::schema::transactions::dsl::*;
 
     let db = &*db;
@@ -112,7 +113,7 @@ pub fn getTransactionList(db: crate::db::DbConn, mut redis: crate::redis::RedisC
 }
 
 #[put("/transaction", format = "json", data = "<data>")]
-pub fn insertTransaction(data: Json<VM_Insert_Transaction>, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<VM_Transaction> {
+pub fn insertTransaction(data: Json<VMInsertTransaction>, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> rocket_contrib::json::Json<VMTransaction> {
     use crate::schema::transactions::dsl::*;
 
     let db = &*db;
@@ -128,8 +129,13 @@ pub fn insertTransaction(data: Json<VM_Insert_Transaction>, db: crate::db::DbCon
         transaction_direction_id: data.transaction_direction_id,
         transaction_type_id: data.transaction_type_id,
 
-        lat: data.lat,
-        lng: data.lng,
+        point: PgPoint(postgis::ewkb::Point {
+            x: data.lng,
+            y: data.lat,
+            srid: None
+        }),
+        // lat: data.lat,
+        // lng: data.lng,
 
         what: data.what.clone(),
         priority: data.priority,
@@ -144,7 +150,7 @@ pub fn insertTransaction(data: Json<VM_Insert_Transaction>, db: crate::db::DbCon
 }
 
 #[post("/transaction", format = "json", data = "<data>")]
-pub fn updateTransaction(data: Json<VM_Update_Transaction>, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> () {
+pub fn updateTransaction(data: Json<VMUpdateTransaction>, db: crate::db::DbConn, mut redis: crate::redis::RedisConn) -> () {
     use crate::schema::transactions::dsl::*;
 
     let db = &*db;
@@ -161,8 +167,13 @@ pub fn updateTransaction(data: Json<VM_Update_Transaction>, db: crate::db::DbCon
         transaction_direction_id: data.transaction_direction_id,
         transaction_type_id: data.transaction_type_id,
 
-        lat: data.lat,
-        lng: data.lng,
+        point: PgPoint(postgis::ewkb::Point {
+            x: data.lng,
+            y: data.lat,
+            srid: None
+        }),
+        // lat: data.lat,
+        // lng: data.lng,
 
         what: data.what.clone(),
         priority: data.priority,

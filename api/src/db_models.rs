@@ -1,5 +1,5 @@
 use std::time::SystemTime;
-use serde::{Serialize, Deserialize};
+// use serde::{Serialize, Deserialize};
 use crate::schema::*;
 
 #[derive(Queryable)]
@@ -39,7 +39,7 @@ pub struct Users {
 
 
 #[derive(Queryable)]
-pub struct Transaction_Constraint {
+pub struct TransactionConstraint {
     pub id: uuid::Uuid,
     pub created: SystemTime,
     pub modified: SystemTime,
@@ -76,8 +76,9 @@ pub struct Transaction {
     pub transaction_type_id: i64,
     pub transaction_direction_id: i64,
 
-    pub lat: f32,
-    pub lng: f32,
+    pub point: crate::sql_types::PgPoint,
+    // pub lat: f32,
+    // pub lng: f32,
 
     pub what: String,
     pub priority: i64,

@@ -1,4 +1,5 @@
 #![feature(proc_macro_hygiene, decl_macro)]
+#![allow(proc_macro_derive_resolution_fallback)]
 
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate diesel;
@@ -6,10 +7,11 @@ extern crate dotenv;
 extern crate geo;
 extern crate reqwest;
 extern crate r2d2_redis;
+extern crate postgis;
 
 use rocket_cors;
-use rocket::http::Method;
-use rocket_cors::{AllowedHeaders, AllowedOrigins, Cors, CorsOptions};
+// use rocket::http::Method;
+// use rocket_cors::{AllowedHeaders, AllowedOrigins, Cors, CorsOptions};
 
 mod db;
 mod redis;
@@ -19,8 +21,9 @@ mod cors_fairing;
 mod transaction;
 mod schema;
 mod geoencoding;
+mod sql_types;
 
-use diesel::prelude::*;
+// use diesel::prelude::*;
 
 
 #[get("/")]

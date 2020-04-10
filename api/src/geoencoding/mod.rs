@@ -2,7 +2,7 @@ use dotenv::dotenv;
 use std::env;
 use std::collections::HashMap;
 use serde::{Serialize,Deserialize};
-use std::thread;
+// use std::thread;
 use r2d2_redis::redis::Commands;
 
 
@@ -94,7 +94,7 @@ struct Location {
     pub matchquality: Option<Matchquality>,
 }
 
-pub fn getAddress(lat: f32, lng: f32, redis: &mut r2d2_redis::redis::Connection) -> Result<Option<Address>, Box<dyn std::error::Error>> {
+pub fn getAddress(lat: f64, lng: f64, redis: &mut r2d2_redis::redis::Connection) -> Result<Option<Address>, Box<dyn std::error::Error>> {
      dotenv().ok();
 
 	let locationiq_key = env::var("LocationIQKey")

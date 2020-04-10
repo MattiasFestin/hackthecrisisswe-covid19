@@ -1,10 +1,10 @@
 use std::time::SystemTime;
 use serde::{Serialize,Deserialize};
-use rocket::data::FromDataSimple;
+// use rocket::data::FromDataSimple;
 // use crate::geoencoding::Address;
 
 #[derive(Serialize, Deserialize)]
-pub struct VM_Transaction {
+pub struct VMTransaction {
     pub id: uuid::Uuid,
     pub created: SystemTime,
     pub modified: SystemTime,
@@ -19,14 +19,14 @@ pub struct VM_Transaction {
     pub what: String,
     pub r#where: Option<crate::geoencoding::Address>,
 
-    pub lat: f32,
-    pub lng: f32,
+    pub lat: f64,
+    pub lng: f64,
 
-    pub constraints: Vec<VM_Constraint>,
+    pub constraints: Vec<VMConstraint>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct VM_Insert_Transaction {
+pub struct VMInsertTransaction {
     // pub id: uuid::Uuid,
     // pub created: SystemTime,
     // pub modified: SystemTime,
@@ -40,14 +40,14 @@ pub struct VM_Insert_Transaction {
 
     pub what: String,
 
-    pub lat: f32,
-    pub lng: f32,
+    pub lat: f64,
+    pub lng: f64,
 
-    pub constraints: Vec<VM_Constraint>,
+    pub constraints: Vec<VMConstraint>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct VM_Update_Transaction {
+pub struct VMUpdateTransaction {
     pub id: uuid::Uuid,
     pub created: SystemTime,
     pub row_version: i64,
@@ -59,13 +59,13 @@ pub struct VM_Update_Transaction {
 
     pub what: String,
 
-    pub lat: f32,
-    pub lng: f32,
+    pub lat: f64,
+    pub lng: f64,
 
-    pub constraints: Vec<VM_Constraint>,
+    pub constraints: Vec<VMConstraint>,
 }
 
-// impl FromDataSimple for VM_Transaction {
+// impl FromDataSimple for VMTransaction {
 //     type Error = String;
 
 //     fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
@@ -99,7 +99,7 @@ pub struct VM_Update_Transaction {
 // }
 
 #[derive(Serialize, Deserialize)]
-pub struct VM_Constraint {
+pub struct VMConstraint {
     pub id: uuid::Uuid,
     pub created: SystemTime,
     pub modified: SystemTime,
@@ -135,14 +135,18 @@ pub enum ConstraintTypeEnum {
 
 #[derive(Serialize, Deserialize)]
 pub enum ConstraintTypeOpEnum {
-    bool_eq,
+    BoolEq,
 
-    list_all,
-    list_some,
+    ListAll,
+    ListSome,
     
-    numeric_eq,
-    numeric_leq,
-    numeric_geq,
-    numeric_gt,
-    numeric_lt
+    
+    NumericEq,
+    NumericNEq,
+
+    NumericGt,
+    NumericGEq,
+
+    NumericLt,
+    NumericLEq,
 }

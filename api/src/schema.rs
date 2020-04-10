@@ -1,4 +1,16 @@
 table! {
+    areas (id) {
+        id -> Uuid,
+        created -> Timestamp,
+        modified -> Timestamp,
+        deleted -> Nullable<Timestamp>,
+        row_version -> Int8,
+        area_code -> Text,
+        parent_area -> Uuid,
+    }
+}
+
+table! {
     base_table (id) {
         id -> Uuid,
         created -> Timestamp,
@@ -27,8 +39,6 @@ table! {
         row_version -> Int8,
         transaction_type_id -> Int8,
         transaction_direction_id -> Int8,
-        lat -> Float4,
-        lng -> Float4,
         what -> Text,
         priority -> Int8,
     }
@@ -50,6 +60,18 @@ table! {
 }
 
 table! {
+    user_areas (id) {
+        id -> Uuid,
+        created -> Timestamp,
+        modified -> Timestamp,
+        deleted -> Nullable<Timestamp>,
+        row_version -> Int8,
+        user -> Uuid,
+        area -> Uuid,
+    }
+}
+
+table! {
     users (id) {
         id -> Uuid,
         created -> Timestamp,
@@ -62,10 +84,15 @@ table! {
     }
 }
 
+joinable!(user_areas -> areas (area));
+joinable!(user_areas -> users (user));
+
 allow_tables_to_appear_in_same_query!(
+    areas,
     base_table,
     spatial_ref_sys,
     transactions,
     transactions_constraints,
+    user_areas,
     users,
 );

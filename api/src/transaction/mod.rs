@@ -7,7 +7,7 @@ use crate::diesel::*;
 use crate::view_models::*;
 // use rocket::State;
 
-use crate::sql_types::{PgPoint};
+use crate::sql_types::PGPoint;
 use crate::geoencoding::*;
 
 #[get("/transaction?<id>")]
@@ -129,7 +129,7 @@ pub fn insertTransaction(data: Json<VMInsertTransaction>, db: crate::db::DbConn,
         transaction_direction_id: data.transaction_direction_id,
         transaction_type_id: data.transaction_type_id,
 
-        point: PgPoint(postgis::ewkb::Point {
+        point: PGPoint(postgis::ewkb::Point {
             x: data.lng,
             y: data.lat,
             srid: None
@@ -165,7 +165,7 @@ pub fn updateTransaction(data: Json<VMUpdateTransaction>, db: crate::db::DbConn,
         transaction_direction_id: data.transaction_direction_id,
         transaction_type_id: data.transaction_type_id,
 
-        point: PgPoint(postgis::ewkb::Point {
+        point: PGPoint(postgis::ewkb::Point {
             x: data.lng,
             y: data.lat,
             srid: None

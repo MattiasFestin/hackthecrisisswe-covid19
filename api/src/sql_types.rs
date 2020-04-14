@@ -10,46 +10,41 @@ use postgis::ewkb::{Point};
 use postgis::ewkb::{EwkbRead, EwkbWrite};
 use postgis::ewkb::AsEwkbPoint;
 
-#[derive(Debug, SqlType)]
-#[postgres(type_name = "st_point")]
-pub struct ST_Point;
+ #[derive(SqlType)]
+#[postgres(type_name = "geography")]
+pub struct Geography;
 
-#[derive(Debug, PartialEq, FromSqlRow, AsExpression)]
-#[sql_type = "ST_Point"]
-pub struct PgPoint(pub Point);
+#[derive(Debug, Copy, Clone, PartialEq, FromSqlRow, AsExpression)]
+#[sql_type = "Geography"]
+pub struct PGPoint(pub Point);
 
-impl ToSql<PgPoint, Pg> for PgPoint {
+impl ToSql<Geography, Pg> for PGPoint {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-		let point = (*self).0;
-
-		match out.write_all(point.as_ewkb().to_hex_ewkb().as_bytes()) {
-			Ok(_data) => Ok(IsNull::No),
-			_ => Err("Could not write point to database".into()),
-		}
+		use postgis::ewkb::{AsEwkbPoint, EwkbWrite};
+		Point::from(*self).as_ewkb().write_ewkb(out)?;
+		Ok(IsNull::No)
     }
 }
 
-impl FromSql<PgPoint, Pg> for PgPoint {
+impl FromSql<Geography, Pg> for PGPoint {
     fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		match bytes {
-			Some(data) => {
-				let mut to_write = data.clone();
-				Ok(PgPoint(Point::read_ewkb(&mut to_write).unwrap()))
-			},
-			None =>  Err("Unrecognized data".into()),
-		}
+		use postgis::ewkb::EwkbRead;
+		use std::io::Cursor;
+		let bytes = not_none!(bytes);
+		let mut rdr = Cursor::new(bytes);
+		Ok(Point::read_ewkb(&mut rdr)?.into())
     }
 }
 
-impl From<PgPoint> for Point {
-	fn from(p: PgPoint) -> Self {
+impl From<PGPoint> for Point {
+	fn from(p: PGPoint) -> Self {
 		p.0
 	}
 }
 
 
-impl From<Point> for PgPoint {
+impl From<Point> for PGPoint {
 	fn from(p: Point) -> Self {
-		PgPoint(p)
+		PGPoint(p)
 	}
 }
